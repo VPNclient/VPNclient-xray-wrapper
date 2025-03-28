@@ -1,0 +1,60 @@
+name: Build and Test VPNclient-engine-linux
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install TAP-Windows driver
+      run: |
+        # Скачиваем и устанавливаем TAP-драйвер (пример для OpenVPN)
+        $tapUrl = "https://swupdate.openvpn.org/community/releases/OpenVPN-2.6.9-I601-amd64.msi"
+        Invoke-WebRequest -Uri $tapUrl -OutFile "OpenVPN.msi"
+        msiexec /i "OpenVPN.msi" /qn ADDLOCAL=TAP /passive
+
+    - name: Set up MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x64
+
+    - name: Configure CMake
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=$env:BUILD_TYPE
+
+    - name: Build
+      run: |
+        cmake --build build --config $env:BUILD_TYPE
+
+    - name: Run tests
+      run: |
+        cd build
+        .\$env:BUILD_TYPE\test_client.exe
+
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: vpnclient-engine-windows
+        path: |
+          build/$env:BUILD_TYPE/vpnclient_engine_windows.lib
+          build/$env:BUILD_TYPE/test_vpnclient_engine_windows.exe
+
+    - name: Create Release
+      if: github.ref == 'refs/heads/main'
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          build/$env:BUILD_TYPE/vpnclient_engine_windows.lib
+          build/$env:BUILD_TYPE/test_vpnclient_engine_windows.exe
