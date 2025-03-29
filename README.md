@@ -59,8 +59,6 @@ We welcome contributions! Please fork the repository and submit pull requests.
 
 ## 📜 License
 
-## 📜 License
-
 This project is licensed under the **VPNclient Extended GNU General Public License v3 (GPL v3)**. See [LICENSE.md](LICENSE.md) for details.
 
 ⚠️ **Note:** By using this software, you agree to comply with additional conditions outlined in the [VPNсlient Extended GNU General Public License v3 (GPL v3)](LICENSE.md)
